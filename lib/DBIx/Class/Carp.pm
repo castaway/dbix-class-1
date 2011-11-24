@@ -18,6 +18,8 @@ BEGIN {
 use Carp ();
 use namespace::clean ();
 
+$Carp::Internal{ (__PACKAGE__) }++;
+
 sub __find_caller {
   my ($skip_pattern, $class) = @_;
 
@@ -28,8 +30,18 @@ sub __find_caller {
     if $skip_class_data;
 
   my $fr_num = 1; # skip us and the calling carp*
-  my @f;
+
+  my (@f, $origin);
   while (@f = caller($fr_num++)) {
+
+    $origin ||= do {
+      my ($class, $func) = $f[3] =~ /^ (.+) :: ([^\:]+) $/x;
+      ( $Carp::Internal{$class} or $func =~ /^(?: throw_exception | carp | carp_unique | carp_once )$/x )
+        ? undef
+        : $f[3]
+      ;
+    };
+
     if (
       $f[0]->can('_skip_namespace_frames')
         and
@@ -41,14 +53,15 @@ sub __find_caller {
     last if $f[0] !~ $skip_pattern;
   }
 
-  my ($ln, $calling) = @f # if empty - nothing matched - full stack
-    ? ( "at $f[1] line $f[2]", $f[3] )
-    : ( Carp::longmess(), '{UNKNOWN}' )
+  my $site = @f # if empty - nothing matched - full stack
+    ? "at $f[1] line $f[2]"
+    : Carp::longmess()
   ;
+  $origin ||= '{UNKNOWN}';
 
   return (
-    $ln,
-    $calling =~ /::/ ? "$calling(): " : "$calling: ", # cargo-cult from Carp::Clan
+    $site,
+    $origin =~ /::/ ? "$origin(): " : "$origin: ", # cargo-cult from Carp::Clan
   );
 };
 
