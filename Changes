@@ -1,6 +1,11 @@
 Revision history for DBIx::Class
 
 ### Unreleased changes from topic branch
+    * New Features / Changes
+        - Support standalone \[ $sql, $value ] in literal SQL with bind
+          specifications: \[ '? + ?', 42, 69 ] is now equivalent to
+          \[ '? + ?', [ {} => 42 ], [ {} => 69 ] ]
+
     * Fixes
         - Correctly recognize root source unqualified columns when
           resolving right-side ordered limited prefetch
