@@ -450,9 +450,6 @@ you have to wrap the search arguments in an -and arrayref:
 Note: the syntax for specifying the bind value's datatype and value is
 explained in L<DBIx::Class::ResultSet/DBIC-BIND-VALUES>.
 
-See also L<SQL::Abstract/Literal SQL with placeholders and bind values
-(subqueries)>.
-
 =head2 Software Limits
 
 When your RDBMS does not have a working SQL limit mechanism (e.g. Sybase ASE)
